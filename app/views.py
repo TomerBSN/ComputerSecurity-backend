@@ -7,11 +7,10 @@ from . serializers import *
 class RegisterView(APIView):
     serializer_class = UserSerializer
 
-    def get(self, request):
-        # TODO need to replace the for loop in SQL query
-        detail = [{"username": detail.username, "pass": detail.password, "email":detail.email}
-                  for detail in User.objects.all()]
-        return Response(detail)
+    # def get(self, request):
+    #     detail = [{"username": detail.username, "pass": detail.password, "email":detail.email}
+    #               for detail in User.objects.all()]
+    #     return Response(detail)
 
     def post(self, request):
         serializer = UserSerializer(data=request.data)

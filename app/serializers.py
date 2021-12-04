@@ -1,19 +1,24 @@
 from rest_framework import serializers
 from .models import *
+from django.db import connections
+cursor = connections['default'].cursor()
 
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        # fields = ['username', 'password']
         fields = ['username', 'password', 'email']
 
     def save(self):
         """
-        place holder - need to implement here SQL query
+        save user details to into app_user table
         :return:
         """
-        print(self.data)
+        username = self.data['username']
+        password = self.data['password']
+        email = self.data['email']
+        cursor.execute("INSERT INTO app_user(username,password,email) VALUES( %s , %s, %s )", [username,
+                                                                                               password, email])
 
 
 class CustomerSerializer(serializers.ModelSerializer):

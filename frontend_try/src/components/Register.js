@@ -91,7 +91,7 @@ class Comp1 extends React.Component {
                             <span className="input-group-text"
                                   id="basic-addon1">
                                 {" "}
-                                Username{" "}
+                                Password{" "}
                             </span>
                         </div>
                         <input type="password" className="form-control "
