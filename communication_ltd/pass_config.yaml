@@ -1,0 +1,15 @@
+min_length: 10
+
+char_types:
+  uppers: True
+  lowers: True
+  numbers: True
+  special_chars: True
+
+min_char_types: 3
+
+history: 3
+
+dict_search: True
+
+login_tries: 3
