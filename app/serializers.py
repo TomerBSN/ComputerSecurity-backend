@@ -86,7 +86,7 @@ class ChangePassSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['username', 'password', 'new_password']
+        fields = ['password', 'new_password']
 
 
 class CustomerSerializer(serializers.ModelSerializer):

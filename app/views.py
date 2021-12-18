@@ -29,13 +29,6 @@ class LoginView(APIView):
         serializer = LoginSerializer(data=request.data)
 
 
-class ChangePassView(APIView):
-    serializer_class = ChangePassSerializer
-
-    def post(self, request):
-        serializer = ChangePassSerializer(data=request.data)
-
-
 class ForgotPassView(APIView):
     serializer_class = ForgotPassSerializer
 
@@ -43,7 +36,20 @@ class ForgotPassView(APIView):
         serializer = ForgotPassSerializer(data=request.data)
 
 
-class MenuView(APIView):
+def menu(request):
+    current_url = request.build_absolute_uri()
+    return HttpResponse(f"<h2><p><a href=\"{current_url}change_pass\">Change Password</a></p>"
+                        f"<p><a href=\"{current_url}add_customer\">Add customer</a></p></h2>")
+
+
+class ChangePassView(APIView):
+    serializer_class = ChangePassSerializer
+
+    def post(self, request):
+        serializer = ChangePassSerializer(data=request.data)
+
+
+class AddCustomerView(APIView):
     serializer_class = CustomerSerializer
 
     def post(self, request):
