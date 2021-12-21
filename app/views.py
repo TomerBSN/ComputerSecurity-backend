@@ -27,6 +27,11 @@ class LoginView(APIView):
 
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            check_status, msg = serializer.checkLogin()
+            if check_status:
+                return Response({"Success": "the password ok!"}, status=status.HTTP_200_OK)
+            return Response({"Fail": msg}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ForgotPassView(APIView):
@@ -34,6 +39,11 @@ class ForgotPassView(APIView):
 
     def post(self, request):
         serializer = ForgotPassSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            check_status, msg = serializer.send_tamp_password()
+            if check_status:
+                return Response({"Success": "the email was send !"}, status=status.HTTP_200_OK)
+            return Response({"Fail": msg}, status=status.HTTP_400_BAD_REQUEST)
 
 
 def menu(request):

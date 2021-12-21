@@ -25,13 +25,16 @@ def verify_password(stored_password, provided_password):
     return pwdhash == stored_password
 
 
-def send_email(user, pwd, recipient, subject, body):
+def send_email(recipient, body):
     import smtplib
 
-    FROM = user
+    # GET THE EMAIL USER FROM THS DB
+    # SEND THE BODY
+
+    FROM = "CommunicationLTD00@gmail.com"
     TO = recipient if isinstance(recipient, list) else [recipient]
-    SUBJECT = subject
-    TEXT = body
+    SUBJECT = "temp password"
+    TEXT = "YOUR TEMP PASS IS:"+body
 
     # Prepare actual message
     message = """From: %s\nTo: %s\nSubject: %s\n\n%s
@@ -40,7 +43,7 @@ def send_email(user, pwd, recipient, subject, body):
         server = smtplib.SMTP("smtp.gmail.com", 587)
         server.ehlo()
         server.starttls()
-        server.login(user, pwd)
+        server.login(FROM, "need to ask oleg ")
         server.sendmail(FROM, TO, message)
         server.close()
         print('successfully sent the mail')
