@@ -1,17 +1,14 @@
 import hashlib
 import os
-
-import null as null
 from rest_framework import serializers
 from .models import *
-from communication_ltd.pass_config import PassConfig
+from communication_ltd.pass_config import pass_config
 from communication_ltd.useful_functions import hash_password
 from communication_ltd.useful_functions import verify_password
 from communication_ltd.useful_functions import send_email
 from django.db import connections
 
 cursor = connections['default'].cursor()
-pass_config = PassConfig()
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -108,7 +105,7 @@ class ForgotPassSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['username']
-    temp_pass= null
+    temp_pass = None
 
     def send_tamp_password(self):
         # check user
@@ -148,6 +145,7 @@ class ForgotPassSerializer(serializers.ModelSerializer):
             email = row[0]
 
         return email
+
 
 class ChangePassSerializer(serializers.ModelSerializer):
     new_password = serializers.CharField()

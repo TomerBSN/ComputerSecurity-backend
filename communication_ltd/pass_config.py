@@ -64,3 +64,6 @@ class PassConfig:
         if user_pass in self.keywords_dict:
             return True
         return False
+
+
+pass_config = PassConfig()

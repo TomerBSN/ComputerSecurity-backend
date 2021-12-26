@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 
 import os
 from pathlib import Path
+from communication_ltd.pass_config import pass_config
 import dotenv  # <- New
 
 # os.environ['HTTPS'] = "on"
@@ -48,6 +49,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     "django_extensions",
     'app',
+    'axes',
     'corsheaders',
     'rest_framework',
 ]
@@ -61,6 +63,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+    'axes.middleware.AxesMiddleware',
 ]
 
 ROOT_URLCONF = 'communication_ltd.urls'
@@ -159,3 +162,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CORS_ORIGIN_WHITELIST = [
      'http://localhost:3000'
 ]
+
+AXES_FAILURE_LIMIT = pass_config.login_tries
+AXES_ONLY_USER_FAILURES = True      # lock by username and not by IP
+AXES_COOLOFF_TIME = 1         # after max login failure, lock user for 1 hour

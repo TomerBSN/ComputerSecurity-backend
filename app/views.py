@@ -1,8 +1,11 @@
 from django.http import HttpResponse
+from django.utils.decorators import method_decorator
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from . serializers import *
+from axes.decorators import axes_dispatch
+from django.contrib.auth import signals
 
 
 class RegisterView(APIView):
@@ -22,6 +25,7 @@ class RegisterView(APIView):
             return Response({"Fail": msg}, status=status.HTTP_400_BAD_REQUEST)
 
 
+@method_decorator(axes_dispatch, name='dispatch')
 class LoginView(APIView):
     serializer_class = LoginSerializer
 
@@ -31,6 +35,14 @@ class LoginView(APIView):
             check_status, msg = serializer.checkLogin()
             if check_status:
                 return Response({"Success": "the password ok!"}, status=status.HTTP_200_OK)
+
+            signals.user_login_failed.send(
+                sender=User,
+                request=request,
+                credentials={
+                    'username': request.data['username'],
+                },
+            )
             return Response({"Fail": msg}, status=status.HTTP_400_BAD_REQUEST)
 
 
