@@ -39,11 +39,6 @@ class UsersManager:
     def set_new_password(self, username, new_hash_salt_pwd):
         self.cursor.execute('UPDATE app_user SET password = %s WHERE username = %s', [new_hash_salt_pwd, username]);
 
-    def func(self, username, history):
-        self.cursor.execute("SELECT * from app_user where username like %s", [username])
-        res = self.cursor.fetchall()
-        print(res)
-
     def save_pwd_on_history(self, username, pwd):
         d = datetime.datetime.now()
         date = f'{d.day}_{d.month}_{d.year}_{d.hour}_{d.minute}_{d.second}'
