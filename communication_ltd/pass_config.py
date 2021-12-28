@@ -65,5 +65,28 @@ class PassConfig:
             return True
         return False
 
+    def verify_pass_by_config(self, password):
+        errors = []
+
+        # validate minimum password length
+        if len(password) < self.min_length:
+            errors.append(f'Password length is lower than {self.min_length} chars!')
+
+        # validate password char types
+        types_counter = self.count_char_types(password)
+        if types_counter < self.min_char_types:  # check for the minimum char types we expect
+            types_group = [key for key, val in self.char_types.items() if self.char_types[key]]
+            errors.append(f'Password must contain at least {self.min_char_types} char types'
+                          f' from the following group: {types_group}!')
+
+        # validate password is not in keywords dictionary
+        if self.is_in_keywords_dict(password):
+            errors.append('Password found in keywords dictionary!')
+
+        if len(errors):
+            return False, errors
+
+        return True, 'OK'
+
 
 pass_config = PassConfig()

@@ -33,9 +33,9 @@ if os.path.isfile(dotenv_file):
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ['SECRET_KEY']
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
 
-ALLOWED_HOSTS = []
+DEBUG = False
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 
 # Application definition
@@ -164,5 +164,4 @@ CORS_ORIGIN_WHITELIST = [
 ]
 
 AXES_FAILURE_LIMIT = pass_config.login_tries
-AXES_ONLY_USER_FAILURES = True      # lock by username and not by IP
 AXES_COOLOFF_TIME = 1         # after max login failure, lock user for 1 hour
