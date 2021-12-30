@@ -128,11 +128,15 @@ class ChangePassSerializer(serializers.ModelSerializer):
 class CustomerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Customer
-        fields = ['first_name', 'last_name']
+        fields = ['first_name', 'last_name', 'email']
 
-    def save(self):
+    def save_customer(self, added_by):
         """
-        place holder - need to implement here SQL query
-        :return:
+        save new customer details to db
+        :return: bool, status msg
         """
-        print(self.data)
+        customer_name = self.data['first_name']
+        customer_last_name = self.data['last_name']
+        customer_email = self.data['email']
+        users_manager.add_customer(customer_name, customer_last_name, customer_email, added_by)
+        return True, f"Customer {customer_name} {customer_last_name} added successfully!"

@@ -1,24 +1,14 @@
-from functools import wraps
 from django.http import HttpResponse, HttpResponseRedirect
 from django.utils.decorators import method_decorator
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from . serializers import *
-from axes.decorators import axes_dispatch
 from django.contrib.auth import signals
+from communication_ltd.decorators import axes_dispatch, auth_gateway
 
 
-def auth_gateway(func):
-    @wraps(func)
-    def inner(request, *args, **kwargs):
-        if 'authenticated' in request.session and request.session['authenticated']:
-            return func(request, *args, **kwargs)
-
-        return HttpResponseRedirect('/login/')
-
-    return inner
-
+# ----------------------------------------Views----------------------------------------
 
 class RegisterView(APIView):
     serializer_class = UserSerializer
@@ -90,6 +80,11 @@ class AddCustomerView(APIView):
 
     def post(self, request):
         serializer = CustomerSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            save_status, msg = serializer.save_customer(request.session['username'])
+            if save_status:
+                return Response({"Success": msg}, status=status.HTTP_200_OK)
+            return Response({"Fail": msg}, status=status.HTTP_400_BAD_REQUEST)
 
 
 def main_view(request):
@@ -106,6 +101,7 @@ def menu(request):
                         f"<p><a href=\"{current_url}add_customer\">Add customer</a></p></h2>")
 
 
+@auth_gateway
 def logout(request):
     request.session.flush()
     return HttpResponseRedirect('/login/')

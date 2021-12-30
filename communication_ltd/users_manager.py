@@ -73,5 +73,9 @@ class UsersManager:
         self.save_pwd_on_history(username, curr_hash_salt_password)  # copy the last password in passwords history table
         return True, 'ok'
 
+    def add_customer(self, customer_name, customer_last_name, customer_email, added_by):
+        self.cursor.execute("INSERT INTO app_customer(first_name,last_name,email,added_by) VALUES( %s , %s, %s, %s )",
+                            [customer_name, customer_last_name, customer_email, added_by])
+
 
 users_manager = UsersManager()

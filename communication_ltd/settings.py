@@ -164,4 +164,5 @@ CORS_ORIGIN_WHITELIST = [
 ]
 
 AXES_FAILURE_LIMIT = pass_config.login_tries
+AXES_ONLY_USER_FAILURES = True
 AXES_COOLOFF_TIME = 1         # after max login failure, lock user for 1 hour
