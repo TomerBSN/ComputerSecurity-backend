@@ -3,6 +3,7 @@ from django.utils.decorators import method_decorator
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from communication_ltd.useful_functions import tamp_save_username_for_chang_pass, tamp_send_username_for_chang_pass
 from . serializers import *
 from django.contrib.auth import signals
 from communication_ltd.decorators import axes_dispatch, auth_gateway
@@ -56,7 +57,20 @@ class ForgotPassView(APIView):
         if serializer.is_valid(raise_exception=True):
             check_status, msg = serializer.send_tamp_password()
             if check_status:
-                return Response({"Success": "the email was send !"}, status=status.HTTP_200_OK)
+                tamp_save_username_for_chang_pass(msg)
+                return HttpResponseRedirect('/verify/')
+
+            return Response({"Fail": msg}, status=status.HTTP_400_BAD_REQUEST)
+
+class VerifyView(APIView):
+    serializer_class = VerifyForgotPass
+
+    def post(self, request):
+        serializer = VerifyForgotPass(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            check_status, msg = serializer.verify_tamp_password()
+            if check_status:
+                return HttpResponseRedirect('/forgot_pass_change_pass/')
 
             return Response({"Fail": msg}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -72,6 +86,20 @@ class ChangePassView(APIView):
             if save_status:
                 return Response({"Success": "User password has changed!"}, status=status.HTTP_200_OK)
             return Response({"Fail": msg}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ForgetPassChangePassView(APIView):
+    serializer_class = ChangePassForForgotPassSerializer
+
+    def post(self, request):
+        serializer = ChangePassForForgotPassSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+
+            save_status, msg = serializer.change_pass(tamp_send_username_for_chang_pass())
+            if save_status:
+                return HttpResponseRedirect('/login/')
+            return Response({"Fail": msg}, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 @method_decorator(auth_gateway, name='dispatch')

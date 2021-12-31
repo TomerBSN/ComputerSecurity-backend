@@ -1,10 +1,10 @@
-import hashlib
-import os
 from rest_framework import serializers
 from .models import *
 from communication_ltd.pass_config import pass_config
 from communication_ltd.users_manager import users_manager
 from communication_ltd.useful_functions import send_email
+from communication_ltd.useful_functions import crate_one_time_pass
+from communication_ltd.useful_functions import verify_one_time_pass
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -32,7 +32,7 @@ class UserSerializer(serializers.ModelSerializer):
 
         email = self.data['email']
 
-        users_manager.save_user_on_db(username, password, email)   # save hash_salt_password in users table
+        users_manager.save_user_on_db(username, password, email)  # save hash_salt_password in users table
 
         return True, 'OK'
 
@@ -42,6 +42,7 @@ class LoginSerializer(serializers.ModelSerializer):
     make user login authentication
     :return: bool, status msg
     """
+
     class Meta:
         model = User
         fields = ['username', 'password']
@@ -57,6 +58,9 @@ class LoginSerializer(serializers.ModelSerializer):
         # check if the password entered by the client is matching to the password (hash+salt) saved in users DB
         if users_manager.verify_user_password(username, password):
             return True, 'Login successfully!'
+        #אם סיסמה שווה לסיסמא הזמנית
+        # בודק מול הטבלה של הסיסמה הזמנית אם הסיסמא מתאימה ואם כן הוא נכנס לאזור של השינוי סיסמא אחרי לוגין ומכניס NULL לטבלה של הסיסמא הזמנית
+        #ועובר לURL של CHANGE PASS
         return False, 'Error: wrong credentials!'
 
 
@@ -65,37 +69,59 @@ class ForgotPassSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['username']
-    temp_pass = None
 
     def send_tamp_password(self):
         # check user
 
         if not users_manager.check_if_user_exists(self.data['username']):
             return False, 'Error: user is already exists!'
-        temp_pass = hashlib.sha1(os.urandom(60)).hexdigest().encode('ascii')
-        # SAVE TO TEMP DB
         username = self.data['username']
-        # if not users_manager.check_if_user_exists(self.data['username']):
-        #     cursor.execute("INSERT INTO temp_pass(username,password) VALUES( %s , %s )", [username, temp_password])
-        # else:
-        #     cursor.execute("UPDATE INTO temp_pass(username,password) VALUES( %s , %s )", [username, temp_password])
-        #
+        temp_pass = crate_one_time_pass()
+
         user_email = users_manager.get_email_of_user_from_db(username)
-        send_email(user_email,str(temp_pass))
-        return True,'ok'
-        # SAVE TO TEMP DB
-        # MESS="YOUR TEMP PASS IS ,TEMP PASS"
-        # CONNECT TO A NEW WINDOW WITH TWO LINES(USER ,PASSWORD) TO INSERT THE TEMP PASS.
-        # CONNECT TO CHANGE PASS
+        send_email(user_email, str(temp_pass))
+        return True, str(username)
 
 
+class VerifyForgotPass(serializers.ModelSerializer):
+    class Meta:
+        model = Verify
+        fields = ['verify']
+
+    def verify_tamp_password(self):
+        user_temp_pass = self.data['verify']
+
+        if not verify_one_time_pass(user_temp_pass):
+            return False, 'Error: time pass wong !'
+
+        return True, 'Success : the verify was success !'
 
 
-    # def verify_temp_pass(self):
-    #
-    #     # if input == temp pass connect to change pass
-    #     # else throw exception
-    #
+class ChangePassForForgotPassSerializer(serializers.ModelSerializer):
+    new_password = serializers.CharField()
+
+    class Meta:
+        model = User
+        fields = ['new_password']
+
+    def change_pass(self, username):
+        """
+        verify new_password is valid, if so save it in users table
+        :return: bool, status msg
+        """
+
+        # # verify that the current password entered by the user is OK
+        # entered_password = self.data['password']
+        # if not users_manager.verify_user_password(username, entered_password):
+        #     return False, 'Error: your current password is wrong!'
+
+        # verify that the new password entered by the user is valid (according to passwords config file)
+        new_password = self.data['new_password']
+        is_ok, msg = pass_config.verify_pass_by_config(new_password)
+        if not is_ok:
+            return False, msg
+
+        return users_manager.check_history_passwords(username, new_password, pass_config.history)
 
 
 class ChangePassSerializer(serializers.ModelSerializer):

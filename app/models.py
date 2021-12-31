@@ -18,3 +18,8 @@ class Customer(models.Model):
     last_name = models.CharField(max_length=50)
     email = models.CharField(max_length=50, default="")
     added_by = models.CharField(max_length=50, default="")
+
+
+class Verify(models.Model):
+    verify = models.CharField(max_length=50)
+

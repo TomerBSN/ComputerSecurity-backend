@@ -25,6 +25,38 @@ def verify_password(stored_password, provided_password):
     return pwdhash == stored_password
 
 
+temp_pass = None
+
+
+def crate_one_time_pass():
+    global temp_pass
+    temp_pass = hashlib.sha1(os.urandom(60)).hexdigest().encode('ascii')
+
+    print("first :  "+str(temp_pass))
+
+    return temp_pass
+
+
+def verify_one_time_pass(user_temp_pass):
+    global temp_pass
+    if(str(user_temp_pass)==str(temp_pass)):
+        return True
+    return False
+
+
+username_tamp = None
+
+
+def tamp_save_username_for_chang_pass(username):
+    global username_tamp
+    username_tamp = username
+
+
+def tamp_send_username_for_chang_pass():
+    global username_tamp
+    return username_tamp
+
+
 def send_email(recipient, body):
     import smtplib
 
@@ -34,7 +66,7 @@ def send_email(recipient, body):
     FROM = "CommunicationLTD00@gmail.com"
     TO = recipient if isinstance(recipient, list) else [recipient]
     SUBJECT = "temp password"
-    TEXT = "YOUR TEMP PASS IS:"+body
+    TEXT = "YOUR TEMP PASS IS:  \n \n               " + body
 
     # Prepare actual message
     message = """From: %s\nTo: %s\nSubject: %s\n\n%s
@@ -49,5 +81,3 @@ def send_email(recipient, body):
         print('successfully sent the mail')
     except:
         print("failed to send mail")
-
-
