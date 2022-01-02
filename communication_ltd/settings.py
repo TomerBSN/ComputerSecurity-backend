@@ -15,7 +15,7 @@ from pathlib import Path
 from communication_ltd.pass_config import pass_config
 import dotenv  # <- New
 
-# os.environ['HTTPS'] = "on"
+SQLI_DEMO = False  # if ture we use vulnerable sql queries
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -34,7 +34,7 @@ if os.path.isfile(dotenv_file):
 SECRET_KEY = os.environ['SECRET_KEY']
 # SECURITY WARNING: don't run with debug turned on in production!
 
-DEBUG = False
+DEBUG = SQLI_DEMO
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 

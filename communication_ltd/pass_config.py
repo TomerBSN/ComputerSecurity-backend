@@ -6,6 +6,7 @@ class PassConfig:
     def __init__(self):
         self.min_length = None
         self.char_types = None
+        self.specials = None
         self.min_char_types = None
         self.history = None
         self.dict_search = None
@@ -23,11 +24,11 @@ class PassConfig:
 
             self.min_length = pass_config['min_length']
             self.char_types = pass_config['char_types']
+            self.specials = pass_config['specials']
             self.min_char_types = pass_config['min_char_types']
             self.history = pass_config['history']
             self.dict_search = pass_config['dict_search']
             self.login_tries = pass_config['login_tries']
-
             if self.dict_search:
                 self.load_keywords_dict()
 
@@ -46,7 +47,7 @@ class PassConfig:
                 lower += 1
             elif user_pass[i].isdigit() and self.char_types['numbers']:
                 number += 1
-            elif self.char_types['special_chars']:
+            elif user_pass[i] in self.specials and self.char_types['special_chars']:
                 special += 1
 
         if upper:

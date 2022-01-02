@@ -1,6 +1,17 @@
 import binascii
 import hashlib
 import os
+import re
+
+regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+
+
+def check_email(email):
+    """Check if email is in format XX@YY.ZZ"""
+    if re.fullmatch(regex, email):
+        return True
+    else:
+        return False
 
 
 def hash_password(password):
@@ -34,7 +45,7 @@ def crate_one_time_pass():
 
     print("first :  "+str(temp_pass))
 
-    return temp_pass
+    return str(temp_pass)
 
 
 def verify_one_time_pass(user_temp_pass):

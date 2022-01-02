@@ -3,12 +3,12 @@ import datetime
 from communication_ltd.useful_functions import verify_password, hash_password
 
 
-class UsersManager:
+class UsersManagerSqli:     # Same logic as UsersManager but with vulnerable sql queries
     def __init__(self):
         self.cursor = connections['default'].cursor()
 
     def check_if_user_exists(self, username):
-        self.cursor.execute("SELECT * from app_user where username like %s", [username])
+        self.cursor.execute(f"SELECT username from app_user where username like " + f"'{username}'")
         res = self.cursor.fetchall()
         if len(res):
             return True
@@ -16,8 +16,8 @@ class UsersManager:
 
     def save_user_on_db(self, username, password, email):
         hash_salt_pwd = hash_password(password)              # make hash+halt
-        self.cursor.execute("INSERT INTO app_user(username,password,email) VALUES( %s , %s, %s )", [username,
-                                                                                               hash_salt_pwd, email])
+        self.cursor.execute("INSERT INTO app_user(username,password,email) VALUES( " + f"'{username}'" +
+                            ", " + f"'{hash_salt_pwd}'" + ", " + f"'{email}')")
 
     def verify_user_password(self, username, password):
         old_pass = self.get_pass_from_db(username)
@@ -27,33 +27,34 @@ class UsersManager:
         return False
 
     def get_pass_from_db(self, username):
-        self.cursor.execute("SELECT password from app_user where username like %s", [username])
+        self.cursor.execute("SELECT password from app_user where username like " + f"'{username}'")
         res = self.cursor.fetchall()
         return res[0][0]
 
     def get_email_of_user_from_db(self, username):
-        self.cursor.execute("SELECT email from app_user where username like %s", [username])
+        self.cursor.execute("SELECT email from app_user where username like " + f"'{username}'")
         res = self.cursor.fetchall()
         return res[0][0]
 
     def set_new_password(self, username, new_hash_salt_pwd):
-        self.cursor.execute('UPDATE app_user SET password = %s WHERE username = %s', [new_hash_salt_pwd, username]);
+        self.cursor.execute('UPDATE app_user SET password = ' + f"'{new_hash_salt_pwd}'" +
+                            ' WHERE username = ' + f"'{username}'")
 
     def save_pwd_on_history(self, username, pwd):
         d = datetime.datetime.now()
         date = f'{d.day}_{d.month}_{d.year}_{d.hour}_{d.minute}_{d.second}'
-        self.cursor.execute("INSERT INTO app_passhistory(username,password,date) VALUES( %s , %s, %s )", [username,
-                                                                                                          pwd, date])
+        self.cursor.execute("INSERT INTO app_passhistory(username,password,date) VALUES( " + f"'{username}'" +
+                            ", " + f"'{pwd}'" + ", " + f"'{date}')")
 
     def get_passwords_history(self, username, history):
-        self.cursor.execute("SELECT password from app_passhistory where username like %s", [username])
+        self.cursor.execute("SELECT password from app_passhistory where username like " + f"'{username}'")
         res = self.cursor.fetchall()
         if len(res):
             passwords_history = list(map(lambda x: x[0], res))[::-1]
             if len(passwords_history) > history:     # if there are more passwords than history limit, than remove them
                 passwords_to_remove = passwords_history[history:]
                 for password in passwords_to_remove:
-                    self.cursor.execute("DELETE from app_passhistory where password like %s", [password])
+                    self.cursor.execute("DELETE from app_passhistory where password like " + f"'{password}'")
             return passwords_history[:history]
         return []
 
@@ -74,15 +75,15 @@ class UsersManager:
         return True, 'ok'
 
     def add_customer(self, customer_name, customer_last_name, customer_email, added_by):
-        self.cursor.execute("INSERT INTO app_customer(first_name,last_name,email,added_by) select %s , %s, %s, %s",
-                            [customer_name, customer_last_name, customer_email, added_by])
+        self.cursor.execute(f"INSERT INTO app_customer(first_name,last_name,email,added_by) select "
+                            f"\'{customer_name}\', \'{customer_last_name}\', \'{customer_email}\', \'{added_by}\'")
 
     def get_customer(self, customer_name, customer_last_name, customer_email):
-        self.cursor.execute("SELECT first_name, last_name from app_customer where "
-                            "first_name like %s and last_name like %s and email like %s ",
-                            [customer_name, customer_last_name, customer_email])
+        self.cursor.execute("SELECT first_name, last_name from app_customer where first_name like " +
+                            f"'{customer_name}'" + " and last_name like " + f"'{customer_last_name}'" +
+                            " and email like " + f"'{customer_email}'")
         res = self.cursor.fetchall()
-        return res[0][0], res[0][1]
+        return res
 
 
-users_manager = UsersManager()
+users_manager = UsersManagerSqli()

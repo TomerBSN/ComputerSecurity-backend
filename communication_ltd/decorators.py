@@ -28,3 +28,28 @@ def auth_gateway(func):
         return HttpResponseRedirect('/login/')
 
     return inner
+
+
+def verify_gateway(func):
+    # This is the verify page session decorator, in order to avoid unattended user to access this page
+    @wraps(func)
+    def inner(request, *args, **kwargs):
+        if 'fp_verify' in request.session and request.session['fp_verify']:
+            return func(request, *args, **kwargs)
+
+        return HttpResponseRedirect('/forgot_pass/')
+
+    return inner
+
+
+def change_pass_fp_gateway(func):
+    # This is the change_pass (after forget pass) session decorator,
+    # user can access this page only if the key sent by email is verified
+    @wraps(func)
+    def inner(request, *args, **kwargs):
+        if 'verified' in request.session and request.session['verified']:
+            return func(request, *args, **kwargs)
+
+        return HttpResponseRedirect('/verify/')
+
+    return inner

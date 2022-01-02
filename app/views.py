@@ -3,10 +3,9 @@ from django.utils.decorators import method_decorator
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from communication_ltd.useful_functions import tamp_save_username_for_chang_pass, tamp_send_username_for_chang_pass
 from . serializers import *
 from django.contrib.auth import signals
-from communication_ltd.decorators import axes_dispatch, auth_gateway
+from communication_ltd.decorators import axes_dispatch, auth_gateway, verify_gateway, change_pass_fp_gateway
 
 
 # ----------------------------------------Views----------------------------------------
@@ -57,21 +56,30 @@ class ForgotPassView(APIView):
         if serializer.is_valid(raise_exception=True):
             check_status, msg = serializer.send_tamp_password()
             if check_status:
-                tamp_save_username_for_chang_pass(msg)
+                request.session['username'] = request.data['username']
+                request.session['ver_key'] = msg    # the key sent to user email
+                request.session['fp_verify'] = True  # access to verify url
+                request.session.set_expiry(900)  # 15 minutes key session
                 return HttpResponseRedirect('/verify/')
 
             return Response({"Fail": msg}, status=status.HTTP_400_BAD_REQUEST)
 
+
+@method_decorator(verify_gateway, name='dispatch')
 class VerifyView(APIView):
     serializer_class = VerifyForgotPass
 
     def post(self, request):
         serializer = VerifyForgotPass(data=request.data)
         if serializer.is_valid(raise_exception=True):
-            check_status, msg = serializer.verify_tamp_password()
+            check_status, msg = serializer.verify_tamp_password(request.session['ver_key'])
             if check_status:
+                request.session['verified'] = True
+                request.session['ver_key'] = request.data['verify']
+
                 return HttpResponseRedirect('/forgot_pass_change_pass/')
 
+            request.session['verified'] = False
             return Response({"Fail": msg}, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -88,6 +96,7 @@ class ChangePassView(APIView):
             return Response({"Fail": msg}, status=status.HTTP_400_BAD_REQUEST)
 
 
+@method_decorator(change_pass_fp_gateway, name='dispatch')
 class ForgetPassChangePassView(APIView):
     serializer_class = ChangePassForForgotPassSerializer
 
@@ -95,11 +104,13 @@ class ForgetPassChangePassView(APIView):
         serializer = ChangePassForForgotPassSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
 
-            save_status, msg = serializer.change_pass(tamp_send_username_for_chang_pass())
+            save_status, msg = serializer.change_pass(request.session['username'])
             if save_status:
+                request.session['fp_verify'] = False
+                request.session['verified'] = False
+                del request.session['ver_key']
                 return HttpResponseRedirect('/login/')
             return Response({"Fail": msg}, status=status.HTTP_400_BAD_REQUEST)
-
 
 
 @method_decorator(auth_gateway, name='dispatch')

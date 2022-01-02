@@ -1,10 +1,16 @@
 from rest_framework import serializers
 from .models import *
 from communication_ltd.pass_config import pass_config
-from communication_ltd.users_manager import users_manager
-from communication_ltd.useful_functions import send_email
+from communication_ltd.useful_functions import check_email, send_email
 from communication_ltd.useful_functions import crate_one_time_pass
-from communication_ltd.useful_functions import verify_one_time_pass
+from django.conf import settings
+
+
+SQLI_DEMO = getattr(settings, "SQLI_DEMO", False)
+if SQLI_DEMO:       # if ture, we want to use vulnerable sql queries
+    from communication_ltd.users_manager_sqli import users_manager
+else:
+    from communication_ltd.users_manager import users_manager
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -31,6 +37,8 @@ class UserSerializer(serializers.ModelSerializer):
             return False, msg
 
         email = self.data['email']
+        if not check_email(email):
+            return False, 'email address is Invalid'
 
         users_manager.save_user_on_db(username, password, email)  # save hash_salt_password in users table
 
@@ -51,16 +59,13 @@ class LoginSerializer(serializers.ModelSerializer):
         # check if username entered by the client is exists in users table
         username = self.data['username']
         if not users_manager.check_if_user_exists(self.data['username']):
-            print('Error: user is not exists!')
             return False, 'Error: wrong credentials!'
         password = self.data['password']
 
         # check if the password entered by the client is matching to the password (hash+salt) saved in users DB
         if users_manager.verify_user_password(username, password):
             return True, 'Login successfully!'
-        #אם סיסמה שווה לסיסמא הזמנית
-        # בודק מול הטבלה של הסיסמה הזמנית אם הסיסמא מתאימה ואם כן הוא נכנס לאזור של השינוי סיסמא אחרי לוגין ומכניס NULL לטבלה של הסיסמא הזמנית
-        #ועובר לURL של CHANGE PASS
+
         return False, 'Error: wrong credentials!'
 
 
@@ -74,13 +79,13 @@ class ForgotPassSerializer(serializers.ModelSerializer):
         # check user
 
         if not users_manager.check_if_user_exists(self.data['username']):
-            return False, 'Error: user is already exists!'
+            return False, 'Error: no such user!'
+
         username = self.data['username']
         temp_pass = crate_one_time_pass()
-
         user_email = users_manager.get_email_of_user_from_db(username)
-        send_email(user_email, str(temp_pass))
-        return True, str(username)
+        send_email(user_email, temp_pass)
+        return True, temp_pass
 
 
 class VerifyForgotPass(serializers.ModelSerializer):
@@ -88,11 +93,11 @@ class VerifyForgotPass(serializers.ModelSerializer):
         model = Verify
         fields = ['verify']
 
-    def verify_tamp_password(self):
+    def verify_tamp_password(self, one_time_pass):
         user_temp_pass = self.data['verify']
 
-        if not verify_one_time_pass(user_temp_pass):
-            return False, 'Error: time pass wong !'
+        if user_temp_pass != one_time_pass:
+            return False, 'Error: key is wrong!'
 
         return True, 'Success : the verify was success !'
 
@@ -165,4 +170,9 @@ class CustomerSerializer(serializers.ModelSerializer):
         customer_last_name = self.data['last_name']
         customer_email = self.data['email']
         users_manager.add_customer(customer_name, customer_last_name, customer_email, added_by)
-        return True, f"Customer {customer_name} {customer_last_name} added successfully!"
+        customer_details = users_manager.get_customer(customer_name, customer_last_name,
+                                                                  customer_email)
+        if len(customer_details):
+            return True, f"Customer {customer_details} added successfully!"
+        else:
+            return False, "Error: customer was not saved!"
