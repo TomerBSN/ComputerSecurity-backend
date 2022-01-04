@@ -149,19 +149,10 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-STATICFILES_DIRS = (
-    os.path.join(ROOT_DIR, 'frontend', 'build', 'static'),
-)
-
-
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-CORS_ORIGIN_WHITELIST = [
-     'http://localhost:3000'
-]
 
 AXES_FAILURE_LIMIT = pass_config.login_tries
 AXES_ONLY_USER_FAILURES = True
