@@ -13,11 +13,6 @@ from communication_ltd.decorators import axes_dispatch, auth_gateway, verify_gat
 class RegisterView(APIView):
     serializer_class = UserSerializer
 
-    # def get(self, request):
-    #     detail = [{"username": detail.username, "pass": detail.password, "email":detail.email}
-    #               for detail in User.objects.all()]
-    #     return Response(detail)
-
     def post(self, request):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
@@ -39,7 +34,7 @@ class LoginView(APIView):
                 request.session['authenticated'] = True
                 request.session['username'] = request.data['username']
                 request.session.set_expiry(1800)            # 30 minutes login session
-                return HttpResponseRedirect('/menu/')       # after user is logged in, refer to menu page
+                return Response({"Success": msg}, status=status.HTTP_400_BAD_REQUEST)       # after user is logged in, refer to menu page
 
             # if user failed to log in, send user_login_failed signal
             signals.user_login_failed.send(sender=User, request=request,
@@ -54,13 +49,13 @@ class ForgotPassView(APIView):
     def post(self, request):
         serializer = ForgotPassSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
-            check_status, msg = serializer.send_tamp_password()
+            check_status, msg = serializer.send_ver_key()
             if check_status:
                 request.session['username'] = request.data['username']
                 request.session['ver_key'] = msg    # the key sent to user email
                 request.session['fp_verify'] = True  # access to verify url
                 request.session.set_expiry(900)  # 15 minutes key session
-                return HttpResponseRedirect('/verify/')
+                return Response({"Success": "successfully sent the mail"}, status=status.HTTP_400_BAD_REQUEST)
 
             return Response({"Fail": msg}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -72,12 +67,12 @@ class VerifyView(APIView):
     def post(self, request):
         serializer = VerifyForgotPass(data=request.data)
         if serializer.is_valid(raise_exception=True):
-            check_status, msg = serializer.verify_tamp_password(request.session['ver_key'])
+            check_status, msg = serializer.verify_ver_key(request.session['ver_key'])
             if check_status:
                 request.session['verified'] = True
                 request.session['ver_key'] = request.data['verify']
 
-                return HttpResponseRedirect('/forgot_pass_change_pass/')
+                return Response({"Success": msg}, status=status.HTTP_400_BAD_REQUEST)
 
             request.session['verified'] = False
             return Response({"Fail": msg}, status=status.HTTP_400_BAD_REQUEST)
@@ -104,12 +99,12 @@ class ForgetPassChangePassView(APIView):
         serializer = ChangePassForForgotPassSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
 
-            save_status, msg = serializer.change_pass(request.session['username'])
+            save_status, msg = serializer.change_pass_one_f(request.session['username'])
             if save_status:
                 request.session['fp_verify'] = False
                 request.session['verified'] = False
                 del request.session['ver_key']
-                return HttpResponseRedirect('/login/')
+                return Response({"Success": "User password has changed!"}, status=status.HTTP_200_OK)
             return Response({"Fail": msg}, status=status.HTTP_400_BAD_REQUEST)
 
 

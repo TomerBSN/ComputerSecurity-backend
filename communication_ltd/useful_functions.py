@@ -36,36 +36,13 @@ def verify_password(stored_password, provided_password):
     return pwdhash == stored_password
 
 
-temp_pass = None
-
-
-def crate_one_time_pass():
-    global temp_pass
+def crate_ver_key():
+    # global temp_pass
     temp_pass = hashlib.sha1(os.urandom(60)).hexdigest().encode('ascii')
 
-    print("first :  "+str(temp_pass))
+    # print("first :  "+str(temp_pass))
 
     return str(temp_pass)
-
-
-def verify_one_time_pass(user_temp_pass):
-    global temp_pass
-    if(str(user_temp_pass)==str(temp_pass)):
-        return True
-    return False
-
-
-username_tamp = None
-
-
-def tamp_save_username_for_chang_pass(username):
-    global username_tamp
-    username_tamp = username
-
-
-def tamp_send_username_for_chang_pass():
-    global username_tamp
-    return username_tamp
 
 
 def send_email(recipient, body):
@@ -86,7 +63,7 @@ def send_email(recipient, body):
         server = smtplib.SMTP("smtp.gmail.com", 587)
         server.ehlo()
         server.starttls()
-        server.login(FROM, "need to ask oleg ")
+        server.login(FROM, "****************")
         server.sendmail(FROM, TO, message)
         server.close()
         print('successfully sent the mail')
