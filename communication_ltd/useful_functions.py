@@ -85,3 +85,7 @@ def send_email(recipient, body):
         print('successfully sent the mail')
     except:
         print("failed to send mail")
+
+
+global users_data
+users_data = {}

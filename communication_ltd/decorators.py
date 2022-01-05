@@ -1,7 +1,8 @@
 from functools import wraps
-from django.http import HttpResponseRedirect
 from axes.handlers.proxy import AxesProxyHandler
 from axes.helpers import get_lockout_response
+from rest_framework.response import Response
+from rest_framework import status
 
 
 # ----------------------------------------Decorators----------------------------------------
@@ -25,7 +26,7 @@ def auth_gateway(func):
         if 'authenticated' in request.session and request.session['authenticated']:
             return func(request, *args, **kwargs)
 
-        return HttpResponseRedirect('/login/')
+        return Response({"Fail"}, status=status.HTTP_200_OK)
 
     return inner
 
@@ -37,7 +38,7 @@ def verify_gateway(func):
         if 'fp_verify' in request.session and request.session['fp_verify']:
             return func(request, *args, **kwargs)
 
-        return HttpResponseRedirect('/forgot_pass/')
+        return Response({"Fail"}, status=status.HTTP_200_OK)
 
     return inner
 
@@ -50,6 +51,6 @@ def change_pass_fp_gateway(func):
         if 'verified' in request.session and request.session['verified']:
             return func(request, *args, **kwargs)
 
-        return HttpResponseRedirect('/verify/')
+        return Response({"Fail"}, status=status.HTTP_200_OK)
 
     return inner

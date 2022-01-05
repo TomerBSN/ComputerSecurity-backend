@@ -15,7 +15,7 @@ from pathlib import Path
 from communication_ltd.pass_config import pass_config
 import dotenv  # <- New
 
-SQLI_DEMO = False  # if ture we use vulnerable sql queries
+SQLI_DEMO = True  # if ture we use vulnerable sql queries
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -36,7 +36,7 @@ SECRET_KEY = os.environ['SECRET_KEY']
 
 DEBUG = SQLI_DEMO
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'https://idanhakim.github.io']
 
 # Application definition
 
@@ -158,7 +158,13 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CORS_ORIGIN_WHITELIST = [
     'https://idanhakim.github.io'
 ]
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_CREDENTIALS = True
 
 AXES_FAILURE_LIMIT = pass_config.login_tries
-AXES_ONLY_USER_FAILURES = True
+# AXES_ONLY_USER_FAILURES = True
+AXES_LOCK_OUT_AT_FAILURE = True
 AXES_COOLOFF_TIME = 1  # after max login failure, lock user for 1 hour
+
+
+SESSION_ENGINE = "django.contrib.sessions.backends.db"
