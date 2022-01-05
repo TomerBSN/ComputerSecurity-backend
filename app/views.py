@@ -19,7 +19,7 @@ class RegisterView(APIView):
             save_status, msg = serializer.save()
             if save_status:
                 return Response({"Success": "User data saved!"}, status=status.HTTP_200_OK)
-            return Response({"Fail": msg}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"Fail": msg}, status=status.HTTP_200_OK)
 
 
 @method_decorator(axes_dispatch, name='dispatch')
@@ -34,13 +34,13 @@ class LoginView(APIView):
                 request.session['authenticated'] = True
                 request.session['username'] = request.data['username']
                 request.session.set_expiry(1800)            # 30 minutes login session
-                return Response({"Success": msg}, status=status.HTTP_400_BAD_REQUEST)       # after user is logged in, refer to menu page
+                return Response({"Success": msg},  status=status.HTTP_200_OK)    # after user is logged in, refer to menu page
 
             # if user failed to log in, send user_login_failed signal
             signals.user_login_failed.send(sender=User, request=request,
                                            credentials={'username': request.data['username'], },)
             request.session['authenticated'] = False
-            return Response({"Fail": msg}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"Fail": msg}, status=status.HTTP_200_OK)
 
 
 class ForgotPassView(APIView):
@@ -55,9 +55,9 @@ class ForgotPassView(APIView):
                 request.session['ver_key'] = msg    # the key sent to user email
                 request.session['fp_verify'] = True  # access to verify url
                 request.session.set_expiry(900)  # 15 minutes key session
-                return Response({"Success": "successfully sent the mail"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"Success": "successfully sent the mail"},  status=status.HTTP_200_OK)
 
-            return Response({"Fail": msg}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"Fail": msg}, status=status.HTTP_200_OK)
 
 
 @method_decorator(verify_gateway, name='dispatch')
@@ -72,10 +72,10 @@ class VerifyView(APIView):
                 request.session['verified'] = True
                 request.session['ver_key'] = request.data['verify']
 
-                return Response({"Success": msg}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"Success": msg},  status=status.HTTP_200_OK)
 
             request.session['verified'] = False
-            return Response({"Fail": msg}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"Fail": msg}, status=status.HTTP_200_OK)
 
 
 @method_decorator(auth_gateway, name='dispatch')
@@ -88,7 +88,7 @@ class ChangePassView(APIView):
             save_status, msg = serializer.change_pass(request.session['username'])
             if save_status:
                 return Response({"Success": "User password has changed!"}, status=status.HTTP_200_OK)
-            return Response({"Fail": msg}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"Fail": msg}, status=status.HTTP_200_OK)
 
 
 @method_decorator(change_pass_fp_gateway, name='dispatch')
@@ -105,7 +105,7 @@ class ForgetPassChangePassView(APIView):
                 request.session['verified'] = False
                 del request.session['ver_key']
                 return Response({"Success": "User password has changed!"}, status=status.HTTP_200_OK)
-            return Response({"Fail": msg}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"Fail": msg}, status=status.HTTP_200_OK)
 
 
 @method_decorator(auth_gateway, name='dispatch')
@@ -118,7 +118,7 @@ class AddCustomerView(APIView):
             save_status, msg = serializer.save_customer(request.session['username'])
             if save_status:
                 return Response({"Success": msg}, status=status.HTTP_200_OK)
-            return Response({"Fail": msg}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"Fail": msg}, status=status.HTTP_200_OK)
 
 
 def main_view(request):
