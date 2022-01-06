@@ -19,6 +19,8 @@ class RegisterView(APIView):
         if serializer.is_valid(raise_exception=True):
             save_status, msg = serializer.save()
             if save_status:
+                users_data['username'] = request.data['username']
+                users_data['authenticated'] = True
                 return Response({"Success": "User data saved!"}, status=status.HTTP_200_OK)
             return Response({"Fail": msg}, status=status.HTTP_200_OK)
 
