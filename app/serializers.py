@@ -161,8 +161,7 @@ class CustomerSerializer(serializers.ModelSerializer):
         customer_last_name = self.data['last_name']
         customer_email = self.data['email']
         users_manager.add_customer(customer_name, customer_last_name, customer_email, added_by)
-        customer_details = users_manager.get_customer(customer_name, customer_last_name,
-                                                      customer_email)
+        customer_details = users_manager.get_customer(customer_name, customer_last_name)
         if len(customer_details):
             return True, f"Customer {customer_details} added successfully!"
         else:

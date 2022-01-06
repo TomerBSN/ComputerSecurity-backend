@@ -8,7 +8,7 @@ class UsersManagerSqli:     # Same logic as UsersManager but with vulnerable sql
         self.cursor = connections['default'].cursor()
 
     def check_if_user_exists(self, username):
-        self.cursor.execute(f"SELECT username from app_user where username like " + f"'{username}'")
+        self.cursor.execute(f"SELECT * from app_user where username like " + f"'{username}'")
         res = self.cursor.fetchall()
         if len(res):
             return True
@@ -78,10 +78,9 @@ class UsersManagerSqli:     # Same logic as UsersManager but with vulnerable sql
         self.cursor.execute(f"INSERT INTO app_customer(first_name,last_name,email,added_by) select "
                             f"\'{customer_name}\', \'{customer_last_name}\', \'{customer_email}\', \'{added_by}\'")
 
-    def get_customer(self, customer_name, customer_last_name, customer_email):
+    def get_customer(self, customer_name, customer_last_name):
         self.cursor.execute("SELECT first_name, last_name from app_customer where first_name like " +
-                            f"'{customer_name}'" + " and last_name like " + f"'{customer_last_name}'" +
-                            " and email like " + f"'{customer_email}'")
+                            f"'{customer_name}'" + " and last_name like " + f"'{customer_last_name}'")
         res = self.cursor.fetchall()
         return res
 

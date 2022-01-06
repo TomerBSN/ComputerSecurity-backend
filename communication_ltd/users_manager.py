@@ -78,10 +78,10 @@ class UsersManager:
         self.cursor.execute("INSERT INTO app_customer(first_name,last_name,email,added_by) select %s , %s, %s, %s",
                             [customer_name, customer_last_name, customer_email, added_by])
 
-    def get_customer(self, customer_name, customer_last_name, customer_email):
+    def get_customer(self, customer_name, customer_last_name):
         self.cursor.execute("SELECT first_name, last_name from app_customer where "
-                            "first_name like %s and last_name like %s and email like %s ",
-                            [customer_name, customer_last_name, customer_email])
+                            "first_name like %s and last_name like %s",
+                            [customer_name, customer_last_name])
         res = self.cursor.fetchall()
         return res[0][0], res[0][1]
 
