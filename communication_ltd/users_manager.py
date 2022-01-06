@@ -8,7 +8,7 @@ class UsersManager:
         self.cursor = connections['default'].cursor()
 
     def check_if_user_exists(self, username):
-        self.cursor.execute("SELECT * from app_user where username like %s", [username])
+        self.cursor.execute("SELECT username from app_user where username like %s", [username])
         res = self.cursor.fetchall()
         if len(res):
             return True

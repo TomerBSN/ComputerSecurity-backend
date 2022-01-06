@@ -8,7 +8,7 @@ class UsersManagerSqli:     # Same logic as UsersManager but with vulnerable sql
         self.cursor = connections['default'].cursor()
 
     def check_if_user_exists(self, username):
-        self.cursor.execute(f"SELECT * from app_user where username like " + f"'{username}'")
+        self.cursor.execute(f"SELECT username from app_user where username like " + f"'{username}'")
         res = self.cursor.fetchall()
         if len(res):
             return True
