@@ -35,8 +35,8 @@ SECRET_KEY = os.environ['SECRET_KEY']
 # SECURITY WARNING: don't run with debug turned on in production!
 
 DEBUG = SQLI_DEMO
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'https://idanhakim.github.io']
 
 # Application definition
 
@@ -86,7 +86,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'communication_ltd.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
@@ -106,8 +105,8 @@ DATABASES = {
         'NAME': 'communication_ltd',
         'USER': DB_USER,
         'PASSWORD': DB_PASS,
-        'HOST':'localhost',
-        'PORT':'3306',
+        'HOST': 'localhost',
+        'PORT': '3306',
     }
 }
 
@@ -129,7 +128,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
@@ -143,7 +141,6 @@ USE_L10N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
@@ -154,6 +151,12 @@ STATIC_URL = '/static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+CORS_ORIGIN_WHITELIST = [
+    'https://idanhakim.github.io'
+]
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_CREDENTIALS = True
+
 AXES_FAILURE_LIMIT = pass_config.login_tries
-AXES_ONLY_USER_FAILURES = True
-AXES_COOLOFF_TIME = 1         # after max login failure, lock user for 1 hour
+AXES_LOCK_OUT_AT_FAILURE = True
+AXES_COOLOFF_TIME = 1  # after max login failure, lock user for 1 hour
